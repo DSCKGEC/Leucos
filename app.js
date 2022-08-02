@@ -1,84 +1,83 @@
 const socketio = require('socket.io');
-const path = require("path");
-const express = require("express");
-const http = require("http");
+const path = require('path');
+const express = require('express');
+const http = require('http');
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
+require('dotenv').config();
 const port = process.env.PORT || 80;
-const views_path = path.join(__dirname, "/views");
-const static_path = path.join(__dirname, "/static");
-const { joinUser, getCurrentUser, userLeave, roomUsers } = require("./utilities/user");
+const views_path = path.join(__dirname, '/views');
+const static_path = path.join(__dirname, '/static');
+const { joinUser, getCurrentUser, userLeave, roomUsers } = require('./utilities/user');
 const { join } = require('path');
 
 //* Static folder
 
-app.use("/static", express.static(static_path));
+app.use('/static', express.static(static_path));
 
 //* view engine
 
 app.set('view engine', 'ejs');
-app.set("views", views_path);
+app.set('views', views_path);
 
-//* Get 
+//* Get
 
-app.get("/", (req, res) => {
-    res.status(200).render("index.ejs");
+app.get('/', (req, res) => {
+  res.status(200).render('index.ejs');
+});
+app.get('/nav', (req, res) => {
+  res.status(200).render('./partials/nav.ejs');
 });
 
-app.get("/chatroom", (req, res) => {
-    res.status(200).render("chat.ejs");
+app.get('/chatroom', (req, res) => {
+  res.status(200).render('chat.ejs');
 });
-
-
 
 //* Web socket
 
-io.on("connection", (socket) => {
+io.on('connection', (socket) => {
+  //* Join room
+  socket.on('join-chat-room', ({ username, room }) => {
+    const user = joinUser(socket.id, username, room);
+    socket.join(user.room);
 
-    //* Join room
-    socket.on("join-chat-room", ({ username, room }) => {
+    //* Bot msg
+    socket.emit('bot', { msg: 'Welcome to Leucos !', position: 'middle' });
 
-        const user = joinUser(socket.id, username, room);
-        socket.join(user.room);
+    socket.broadcast.to(user.room).emit('bot', { msg: `${user.username} joined the room`, position: 'middle' });
 
-
-        //* Bot msg
-        socket.emit("bot", { msg: "Welcome to Leucos !", position: "middle" });
-
-        socket.broadcast.to(user.room).emit("bot", { msg: `${user.username} joined the room`, position: "middle" });
-
-        //* User and room info
-        io.to(user.room).emit("room-users", {
-            room: user.room,
-            users: roomUsers(user.room)
-        })
+    //* User and room info
+    io.to(user.room).emit('room-users', {
+      room: user.room,
+      users: roomUsers(user.room),
     });
+  });
 
-    //* User msg    
-    socket.on("chat-msg", (msg) => {
-        const user = getCurrentUser(socket.id);
-        const username = user.username;
-        socket.broadcast.to(user.room).emit("message", { msg, position: "left", username });
-        socket.emit("receive", { msg, position: "right", username: "You" });
-    });
+  //* User msg
+  socket.on('chat-msg', (msg) => {
+    const user = getCurrentUser(socket.id);
+    const username = user.username;
+    socket.broadcast.to(user.room).emit('message', { msg, position: 'left', username });
+    socket.emit('receive', { msg, position: 'right', username: 'You' });
+  });
 
-    //* Disconnect
-    socket.on("disconnect", () => {
-        const user = userLeave(socket.id);
-        if (user) {
-            socket.broadcast.to(user.room).emit("bot", { msg: `${user.username} left the room`, position: "middle" });
+  //* Disconnect
+  socket.on('disconnect', () => {
+    const user = userLeave(socket.id);
+    if (user) {
+      socket.broadcast.to(user.room).emit('bot', { msg: `${user.username} left the room`, position: 'middle' });
 
-            //* User and room info
-            io.to(user.room).emit("room-users", {
-                room: user.room,
-                users: roomUsers(user.room)
-            })
-        }
-    });
+      //* User and room info
+      io.to(user.room).emit('room-users', {
+        room: user.room,
+        users: roomUsers(user.room),
+      });
+    }
+  });
 });
 
 //* listen
 server.listen(port, () => {
-    console.log(`The application started successfully on port ${port}`);
+  console.log(`The application started successfully on port ${port}`);
 });

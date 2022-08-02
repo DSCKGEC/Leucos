@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+    <link rel="stylesheet" href="../../static/css/partials/nav.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container row">
+        <button class="nav-toggle" aria-label="open navigation">
+          <span class="hamburger"></span>
+        </button>
+        <a class="logo" href="#">
+          <img src="../../static/img/leucos-logo.png" alt="logo" />
+        </a>
+        <nav class="nav">
+          <ul class="nav__list nav__list--primary">
+            <li class="nav__item"><a href="#" class="nav__link active">Home</a></li>
+            <li class="nav__item"><a href="#" class="nav__link">Features</a></li>
+            <li class="nav__item"><a href="#" class="nav__link">Pricing</a></li>
+          </ul>
+          <ul class="nav__list nav__list--secondary">
+            <li class="nav__item"><a href="#" class="nav__link">Log In</a></li>
+            <li class="nav__item"><a href="#" class="nav__link nav__link--button">Sign up</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <script type="text/javascript">
+      const navToggle = document.querySelector('.nav-toggle');
+      const nav = document.querySelector('.nav');
+
+      navToggle.addEventListener('click', () => {
+        nav.classList.toggle('nav--visible');
+      });
+    </script>
+  </body>
+</html>
