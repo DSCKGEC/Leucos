@@ -26,9 +26,13 @@ app.set('views', views_path);
 app.get('/', (req, res) => {
   res.status(200).render('index.ejs');
 });
+
+//* Uncomment this to preview the Navbar
+/*
 app.get('/nav', (req, res) => {
   res.status(200).render('./partials/nav.ejs');
 });
+*/
 
 app.get('/chatroom', (req, res) => {
   res.status(200).render('chat.ejs');
